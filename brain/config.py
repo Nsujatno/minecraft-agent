@@ -1,5 +1,3 @@
-"""All env-derived settings. Nothing else reads os.environ."""
-
 import os
 from pathlib import Path
 

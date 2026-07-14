@@ -1,5 +1,3 @@
-"""OpenAI access. The only module that knows a model exists."""
-
 import logging
 from collections import deque
 
@@ -19,7 +17,7 @@ class BudgetExceeded(Exception):
 
 
 class Chatbot:
-    """Rolling-context chat. No persistent memory — that's M2's state file."""
+    """Rolling-context chat."""
 
     def __init__(self, model: str, max_calls: int, history_turns: int) -> None:
         self._client = AsyncOpenAI()

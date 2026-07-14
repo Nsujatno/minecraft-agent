@@ -1,4 +1,4 @@
-"""Policy: what the bot does about an event. Knows nothing about transport."""
+"""LLM agent that decides what to do from an event"""
 
 import logging
 
@@ -20,6 +20,8 @@ class Agent:
         if isinstance(event, ChatEvent):
             if event.message == "ping":  # free liveness check, spends no tokens
                 return ChatAction(message=f"pong, {event.username}")
+            if event.message == "nida":
+                return ChatAction(message="is the goat")
             try:
                 return ChatAction(message=await self._chatbot.reply(event.username, event.message))
             except BudgetExceeded as e:

@@ -1,5 +1,3 @@
-"""Transport: the websocket to the bot. Knows nothing about the LLM."""
-
 import asyncio
 import logging
 
