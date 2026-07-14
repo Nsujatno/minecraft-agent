@@ -22,8 +22,6 @@ async def _pump(ws, agent: Agent) -> None:
             continue
 
         log.info("event: %s", event)
-        # ponytail: awaited inline, so one LLM call at a time and events queue behind
-        # it. asyncio.create_task per event if it ever feels laggy.
         action = await agent.decide(event)
         if action:
             await ws.send(action.model_dump_json())

@@ -4,6 +4,7 @@ import logging
 from collections import deque
 
 from openai import AsyncOpenAI
+from openai.types.responses import ResponseInputItemParam
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class Chatbot:
         self._client = AsyncOpenAI()
         self._model = model
         self._max_calls = max_calls
-        self._history: deque[dict[str, str]] = deque(maxlen=history_turns * 2)
+        self._history: deque[ResponseInputItemParam] = deque(maxlen=history_turns * 2)
         self.calls = 0
 
     async def reply(self, username: str, message: str) -> str:

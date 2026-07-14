@@ -10,6 +10,7 @@ from llm import Chatbot
 
 
 def main() -> None:
+    print("Running ", config.OPENAI_MODEL)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)-7s %(message)s",
