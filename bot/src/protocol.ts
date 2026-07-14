@@ -14,5 +14,6 @@ export type Event = ChatEvent | DeathEvent;
 // --- actions: brain -> bot ---
 
 export type ChatAction = { action: "chat"; message: string };
+export type GotoAction = { action: "goto"; x: number; y: number; z: number };
 
-export type Action = ChatAction;
+export type Action = ChatAction | GotoAction;

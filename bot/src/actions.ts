@@ -5,6 +5,9 @@
 
 import type { Bot } from "mineflayer";
 import type { Action } from "./protocol.js";
+import pathfinderPkg from "mineflayer-pathfinder";
+
+const { goals } = pathfinderPkg;
 
 const CHAT_LIMIT = 256; // minecraft drops anything longer
 const CHAT_GAP_MS = 300; // vanilla kicks for chat spam; don't fire them all at once
@@ -40,6 +43,10 @@ export async function execute(bot: Bot, action: Action): Promise<void> {
         if (i > 0) await sleep(CHAT_GAP_MS);
         bot.chat(part);
       }
+      return;
+    }
+    case "goto": {
+      await bot.pathfinder.goto(new goals.GoalNear(action.x, action.y, action.z, 1))
       return;
     }
     default:

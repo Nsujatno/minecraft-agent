@@ -4,11 +4,13 @@ from collections import deque
 from openai import AsyncOpenAI
 from openai.types.responses import ResponseInputItemParam
 
+from protocol import Action, ChatAction, Decision
+
 log = logging.getLogger(__name__)
 
 SYSTEM = (
-    "You are a bot standing in the player's Minecraft world, talking in in-game chat. "
-    "Be conversational and concise. Plain text, no markdown."
+    "You are a bot standing in the player's Minecraft world, you can "
+    "respond to in-game chat messages and take actions in the world. Act accordingly."
 )
 
 
@@ -26,19 +28,24 @@ class Chatbot:
         self._history: deque[ResponseInputItemParam] = deque(maxlen=history_turns * 2)
         self.calls = 0
 
-    async def reply(self, username: str, message: str) -> str:
+    async def decide(self, username: str, message: str) -> Action:
         if self.calls >= self._max_calls:
             raise BudgetExceeded(f"llm budget cap reached ({self._max_calls} calls)")
         self.calls += 1
 
         self._history.append({"role": "user", "content": f"{username}: {message}"})
-        response = await self._client.responses.create(
+        response = await self._client.responses.parse(
+            text_format=Decision,
             model=self._model,
             instructions=SYSTEM,
             input=list(self._history),
         )
-        reply = response.output_text.strip()
-        self._history.append({"role": "assistant", "content": reply})
+        decision = response.output_parsed
+        if not decision:
+            return ChatAction(message="LLM failed to generate a response")
 
-        log.info("llm call %d/%d -> %s", self.calls, self._max_calls, reply)
-        return reply
+        self._history.append({"role": "assistant", "content": decision.model_dump_json()})
+
+        log.info("llm call %d/%d -> %s", self.calls, self._max_calls, decision.model_dump_json())
+        
+        return decision.action

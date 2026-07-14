@@ -23,7 +23,7 @@ class Agent:
             if event.message == "nida":
                 return ChatAction(message="is the goat")
             try:
-                return ChatAction(message=await self._chatbot.reply(event.username, event.message))
+                return await self._chatbot.decide(event.username, event.message)
             except BudgetExceeded as e:
                 log.warning("%s", e)
                 return ChatAction(message=f"({e})")

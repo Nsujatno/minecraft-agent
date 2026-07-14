@@ -3,9 +3,9 @@
 Keep the two sides in sync: this file is the interface, not the code around it.
 """
 
-from typing import Annotated, Literal, Union
+from typing import Literal, Union
 
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import BaseModel, TypeAdapter
 
 # --- events: bot -> brain ---
 
@@ -20,7 +20,7 @@ class DeathEvent(BaseModel):
     type: Literal["death"]
 
 
-Event = Annotated[Union[ChatEvent, DeathEvent], Field(discriminator="type")]
+Event = Union[ChatEvent, DeathEvent]
 event_adapter: TypeAdapter[Event] = TypeAdapter(Event)
 
 
@@ -35,4 +35,17 @@ class ChatAction(BaseModel):
     message: str
 
 
-Action = ChatAction
+class GotoAction(BaseModel):
+    action: Literal["goto"] = "goto"
+    x: int
+    y: int
+    z: int
+
+
+Action = Union[ChatAction, GotoAction]
+
+
+# LLM structured output
+class Decision(BaseModel):
+    action: Action
+    reason: str
