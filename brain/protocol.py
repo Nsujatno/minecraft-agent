@@ -5,7 +5,7 @@ Keep the two sides in sync: this file is the interface, not the code around it.
 
 from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, Field, TypeAdapter, field_validator
+from pydantic import BaseModel, Field, TypeAdapter
 
 # --- events: bot -> brain ---
 
@@ -28,15 +28,11 @@ event_adapter: TypeAdapter[Event] = TypeAdapter(Event)
 
 
 class ChatAction(BaseModel):
+    """Length and newlines are the bot's problem: actions.ts splits anything over
+    Minecraft's 256-char cap across several messages."""
+
     action: Literal["chat"] = "chat"
     message: str
-
-    @field_validator("message")
-    @classmethod
-    def single_line(cls, v: str) -> str:
-        """Minecraft chat is one line. (It also caps at 256 chars — the model is
-        prompted to stay short rather than truncated here.)"""
-        return v.replace("\n", " ").strip()
 
 
 Action = ChatAction

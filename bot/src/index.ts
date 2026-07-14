@@ -14,5 +14,7 @@ const bot = mineflayer.createBot({
   version: config.MC_VERSION,
 });
 
-const link = new BrainLink(config.WS_PORT, (action) => execute(bot, action));
+const link = new BrainLink(config.WS_PORT, (action) => {
+  execute(bot, action).catch((err) => console.log("action failed:", err.message));
+});
 wire(bot, link);
