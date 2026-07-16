@@ -55,6 +55,24 @@ export async function execute(bot: Bot, action: Action): Promise<void> {
       }
       return;
     }
+    case "collect_block": {
+      const count = Math.min(action.count ?? 1, 64);
+      let collected = 0;
+      for (let i = 0; i < count; i++) {
+        const block = bot.findBlock({
+          matching: (b) => b.name.includes(action.name),
+          maxDistance: 64,
+        });
+        if (!block) break; // none left in range
+        await bot.pathfinder.goto(
+          new goals.GoalGetToBlock(block.position.x, block.position.y, block.position.z),
+        );
+        await bot.dig(block);
+        collected++;
+      }
+      if (collected === 0) throw new Error(`no ${action.name} within range`);
+      return;
+    }
     default:
       console.log("unknown action, ignoring:", action);
   }

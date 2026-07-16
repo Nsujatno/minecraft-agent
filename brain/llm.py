@@ -15,6 +15,10 @@ SYSTEM = (
     "decide the next action. A goto that returns ok means you have arrived — positions "
     "are approximate (within about a block), so never re-issue goto to correct small "
     "coordinate differences. When the goal is complete, return no action (null)."
+    "To gather a block, call collect_block with a count and name substring: use 'log' for wood"
+    " (tree trunks are oak_log, birch_log, etc.), or 'iron_ore' for iron. collect_block"
+    " finds the nearest match within range and walks to it itself, so do not goto first —"
+    " just call collect_block directly."
 )
 
 

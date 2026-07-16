@@ -4,7 +4,7 @@ import mineflayer from "mineflayer";
 import { execute } from "./actions.js";
 import { BrainLink } from "./brainLink.js";
 import * as config from "./config.js";
-import { wire } from "./events.js";
+import { wire, snapshot } from "./events.js";
 import { Movements, pathfinder } from "mineflayer-pathfinder";
 
 const bot = mineflayer.createBot({
@@ -28,15 +28,12 @@ const link = new BrainLink(config.WS_PORT, async (action) => {
     error = (err as Error).message;
     console.log("action failed:", error);
   }
-  const { x, y, z } = bot.entity.position;
   link.emit({
     type: "action_result",
     action: action.action,
     ok,
     error,
-    x, y, z,
-    health: bot.health,
-    food: bot.food,
+    ...snapshot(bot),
   });
 });
 wire(bot, link);

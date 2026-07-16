@@ -14,6 +14,12 @@ class ChatEvent(BaseModel):
     type: Literal["chat"]
     username: str
     message: str
+    x: float
+    y: float
+    z: float
+    health: float
+    food: float
+    inventory: dict[str, int]
 
 
 class DeathEvent(BaseModel):
@@ -33,6 +39,7 @@ class ActionResult(BaseModel):
     z: float
     health: float
     food: float
+    inventory: dict[str, int]
 
 
 Event = Union[ChatEvent, DeathEvent, ActionResult]
@@ -57,7 +64,13 @@ class GotoAction(BaseModel):
     z: int
 
 
-Action = Union[ChatAction, GotoAction]
+class CollectBlockAction(BaseModel):
+    action: Literal["collect_block"] = "collect_block"
+    name: str
+    count: int = 1
+
+
+Action = Union[ChatAction, GotoAction, CollectBlockAction]
 
 
 # LLM structured output

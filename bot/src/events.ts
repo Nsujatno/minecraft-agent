@@ -16,7 +16,7 @@ export function wire(bot: Bot, link: BrainLink): void {
   bot.on("chat", (username, message) => {
     if (username === bot.username) return; // don't echo ourselves into the brain
     console.log(`<${username}> ${message}`);
-    link.emit({ type: "chat", username, message });
+    link.emit({ type: "chat", username, message, ...snapshot(bot) });
   });
 
   bot.on("death", () => {
@@ -27,4 +27,17 @@ export function wire(bot: Bot, link: BrainLink): void {
   // local-only: the brain has no say in these
   bot.on("kicked", (reason) => console.log("kicked:", reason));
   bot.on("error", (err) => console.log("error:", err.message));
+}
+
+export function snapshot(bot: Bot) {
+  const { x, y, z } = bot.entity.position;
+  return {
+    x, y, z,
+    health: bot.health,
+    food: bot.food,
+    inventory: bot.inventory.items().reduce(
+      (acc, i) => { acc[i.name] = i.count; return acc; },
+      {} as { [name: string]: number },
+    ),
+  };
 }

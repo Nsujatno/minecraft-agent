@@ -14,12 +14,15 @@ from protocol import Action, ActionResult, ChatAction, ChatEvent, DeathEvent, Ev
 log = logging.getLogger(__name__)
 
 
+def _describe_state(s: ActionResult | ChatEvent) -> str:
+    inv = ", ".join(f"{n} x{c}" for n, c in s.inventory.items()) or "empty"
+    return (f"position {s.x:.0f} {s.y:.0f} {s.z:.0f}, "
+            f"health {s.health:.0f}, food {s.food:.0f}, inventory: {inv}")
+
+
 def _describe(r: ActionResult) -> str:
     status = "ok" if r.ok else f"failed: {r.error}"
-    return (
-        f"[observation] action {r.action} {status}. "
-        f"position {r.x:.0f} {r.y:.0f} {r.z:.0f}, health {r.health:.0f}, food {r.food:.0f}"
-    )
+    return f"[observation] action {r.action} {status}. {_describe_state(r)}"
 
 
 class Agent:
@@ -40,7 +43,8 @@ class Agent:
             # a user message starts a fresh LLM-driven loop
             self._active = True
             self._steps = 0
-            return await self._think(f"{event.username}: {event.message}")
+            obs = f"{event.username}: {event.message}\n[your state] {_describe_state(event)}"
+            return await self._think(obs)
 
         if isinstance(event, ActionResult):
             if not self._active:  # result of a one-off canned action; no follow-up
