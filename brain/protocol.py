@@ -50,14 +50,14 @@ event_adapter: TypeAdapter[Event] = TypeAdapter(Event)
 
 
 class ChatAction(BaseModel):
-    """Length and newlines are the bot's problem: actions.ts splits anything over
-    Minecraft's 256-char cap across several messages."""
+    """Say something to the player in in-game chat."""
 
     action: Literal["chat"] = "chat"
     message: str
 
 
 class GotoAction(BaseModel):
+    """Walk to approximately (x, y, z). Arriving within about a block is success."""
     action: Literal["goto"] = "goto"
     x: int
     y: int
@@ -65,6 +65,8 @@ class GotoAction(BaseModel):
 
 
 class CollectBlockAction(BaseModel):
+    """Mine up to `count` of the nearest blocks whose name contains `name`.
+    Finds and walks to each block automatically — do NOT goto first."""
     action: Literal["collect_block"] = "collect_block"
     name: str
     count: int = 1

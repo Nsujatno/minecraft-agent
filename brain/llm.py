@@ -4,22 +4,41 @@ from collections import deque
 from openai import AsyncOpenAI
 from openai.types.responses import ResponseInputItemParam
 
+from typing import get_args
 from protocol import Action, ChatAction, Decision
 
 log = logging.getLogger(__name__)
 
-SYSTEM = (
-    "You are a bot standing in the player's Minecraft world. You respond to in-game "
-    "chat and take actions to accomplish goals. You act one step at a time: after each "
-    "action you receive an observation with its result and your current state, then you "
-    "decide the next action. A goto that returns ok means you have arrived — positions "
-    "are approximate (within about a block), so never re-issue goto to correct small "
-    "coordinate differences. When the goal is complete, return no action (null)."
-    "To gather a block, call collect_block with a count and name substring: use 'log' for wood"
-    " (tree trunks are oak_log, birch_log, etc.), or 'iron_ore' for iron. collect_block"
-    " finds the nearest match within range and walks to it itself, so do not goto first —"
-    " just call collect_block directly."
+def _actions_doc() -> str:
+    lines = []
+    for model in get_args(Action):
+        name = model.model_fields["action"].default
+        desc = " ".join((model.__doc__ or "").split())
+        lines.append(f"- {name}: {desc}")
+        for fname, field in model.model_fields.items():
+            if fname == "action":
+                continue
+            tname = getattr(field.annotation, "__name__", str(field.annotation))
+            default = "" if field.is_required() else f", default {field.default}"
+            lines.append(f"    {fname} ({tname}{default}): {field.description or ''}")
+    return "\n".join(lines)
+
+
+BASE = (
+    "You are an autonomous agent controlling a character in a Minecraft world. The "
+    "player gives you goals in chat. Break each goal into concrete steps and carry "
+    "them out one action at a time. After each action you receive an observation with "
+    "the result and your current state (position, health, inventory) — use it to decide "
+    "the next step.\n"
+    "Think about prerequisites before acting: obtaining something often requires tools "
+    "or materials first (mining stone needs a pickaxe, which needs planks and sticks, "
+    "which need wood). Only take an action once its prerequisites are met.\n"
+    "You may ONLY use the actions listed below. If a goal needs something these actions "
+    "cannot do, say so in chat instead of pretending. Return no action (null) when the "
+    "goal is complete."
 )
+
+SYSTEM = f"{BASE}\n\nActions:\n{_actions_doc()}"
 
 
 class BudgetExceeded(Exception):
