@@ -20,7 +20,22 @@ class DeathEvent(BaseModel):
     type: Literal["death"]
 
 
-Event = Union[ChatEvent, DeathEvent]
+class ActionResult(BaseModel):
+    """Result of an executed action, fed back so the agent can decide the next
+    step. Carries self-state so it doubles as perception."""
+
+    type: Literal["action_result"]
+    action: str
+    ok: bool
+    error: str | None = None
+    x: float
+    y: float
+    z: float
+    health: float
+    food: float
+
+
+Event = Union[ChatEvent, DeathEvent, ActionResult]
 event_adapter: TypeAdapter[Event] = TypeAdapter(Event)
 
 
@@ -47,5 +62,5 @@ Action = Union[ChatAction, GotoAction]
 
 # LLM structured output
 class Decision(BaseModel):
-    action: Action
+    action: Action | None  # None = goal complete, stop the loop
     reason: str

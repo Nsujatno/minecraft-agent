@@ -12,3 +12,4 @@ RECONNECT_SECONDS = 2.0
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 MAX_LLM_CALLS = int(os.getenv("MAX_LLM_CALLS", "50"))  # hard session cap — PRD cost control
 HISTORY_TURNS = int(os.getenv("HISTORY_TURNS", "10"))
+MAX_STEPS = int(os.getenv("MAX_STEPS", "15"))  # per-request loop cap; tune once real skills land

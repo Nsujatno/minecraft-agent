@@ -46,7 +46,13 @@ export async function execute(bot: Bot, action: Action): Promise<void> {
       return;
     }
     case "goto": {
-      await bot.pathfinder.goto(new goals.GoalNear(action.x, action.y, action.z, 1))
+      try {
+        await bot.pathfinder.goto(new goals.GoalNear(action.x, action.y, action.z, 1));
+      } catch (err) {
+        // a newer goto superseded this one; not a real failure
+        if ((err as Error).name === "GoalChanged") return;
+        throw err;
+      }
       return;
     }
     default:

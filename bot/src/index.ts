@@ -18,7 +18,25 @@ const bot = mineflayer.createBot({
 bot.loadPlugin(pathfinder)
 bot.once("spawn", () => bot.pathfinder.setMovements(new Movements(bot)));
 
-const link = new BrainLink(config.WS_PORT, (action) => {
-  execute(bot, action).catch((err) => console.log("action failed:", err.message));
+const link = new BrainLink(config.WS_PORT, async (action) => {
+  let ok = true;
+  let error: string | undefined;
+  try {
+    await execute(bot, action);
+  } catch (err) {
+    ok = false;
+    error = (err as Error).message;
+    console.log("action failed:", error);
+  }
+  const { x, y, z } = bot.entity.position;
+  link.emit({
+    type: "action_result",
+    action: action.action,
+    ok,
+    error,
+    x, y, z,
+    health: bot.health,
+    food: bot.food,
+  });
 });
 wire(bot, link);

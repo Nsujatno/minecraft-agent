@@ -9,7 +9,20 @@
 export type ChatEvent = { type: "chat"; username: string; message: string };
 export type DeathEvent = { type: "death" };
 
-export type Event = ChatEvent | DeathEvent;
+// result of executing an action, feeds back to brain to decide next step
+export type ActionResult = {
+  type: "action_result";
+  action: string;
+  ok: boolean;
+  error?: string;
+  x: number;
+  y: number;
+  z: number;
+  health: number;
+  food: number;
+};
+
+export type Event = ChatEvent | DeathEvent | ActionResult;
 
 // --- actions: brain -> bot ---
 
