@@ -5,7 +5,7 @@ Keep the two sides in sync: this file is the interface, not the code around it.
 
 from typing import Literal, Union
 
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel, TypeAdapter, Field
 
 # --- events: bot -> brain ---
 
@@ -68,7 +68,7 @@ class CollectBlockAction(BaseModel):
     """Mine up to `count` of the nearest blocks whose name contains `name`.
     Finds and walks to each block automatically — do NOT goto first."""
     action: Literal["collect_block"] = "collect_block"
-    name: str
+    name: str = Field(description="block-name substring, e.g. 'log' for wood, 'iron_ore' for iron")
     count: int = 1
 
 
