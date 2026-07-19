@@ -72,7 +72,16 @@ class CollectBlockAction(BaseModel):
     count: int = 1
 
 
-Action = Union[ChatAction, GotoAction, CollectBlockAction]
+class CraftAction(BaseModel):
+    """Craft `count` of item `name`. Uses a nearby crafting table automatically if
+    the recipe needs a 3x3 grid; 2x2 recipes are made in inventory. You must already
+    have the ingredients — check inventory first."""
+    action: Literal["craft"] = "craft"
+    name: str = Field(description="exact item name, e.g. 'stick', 'crafting_table', 'wooden_pickaxe'")
+    count: int = 1
+
+
+Action = Union[ChatAction, GotoAction, CollectBlockAction, CraftAction]
 
 
 # LLM structured output

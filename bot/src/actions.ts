@@ -4,10 +4,31 @@
  */
 
 import type { Bot } from "mineflayer";
+import type { Block } from "prismarine-block";
 import type { Action } from "./protocol.js";
 import pathfinderPkg from "mineflayer-pathfinder";
+import { Vec3 } from "vec3";
 
 const { goals } = pathfinderPkg;
+
+/** Place a crafting table from inventory onto open ground next to the bot. */
+async function placeCraftingTable(bot: Bot): Promise<Block> {
+  const held = bot.inventory.items().find((i) => i.name === "crafting_table");
+  if (!held) throw new Error("no crafting_table in inventory to place");
+  await bot.equip(held, "hand");
+
+  const base = bot.entity.position.floored();
+  for (const d of [new Vec3(1, 0, 0), new Vec3(-1, 0, 0), new Vec3(0, 0, 1), new Vec3(0, 0, -1)]) {
+    const target = base.plus(d); // cell to fill, at foot level
+    const ref = bot.blockAt(target.plus(new Vec3(0, -1, 0))); // solid block under it
+    if (bot.blockAt(target)?.boundingBox !== "empty" || ref?.boundingBox !== "block") continue;
+    await bot.lookAt(target.offset(0.5, 0.5, 0.5));
+    await bot.placeBlock(ref, new Vec3(0, 1, 0));
+    const placed = bot.blockAt(target);
+    if (placed?.name === "crafting_table") return placed;
+  }
+  throw new Error("couldn't place crafting table — no clear spot next to me");
+}
 
 const CHAT_LIMIT = 256; // minecraft drops anything longer
 const CHAT_GAP_MS = 300; // vanilla kicks for chat spam; don't fire them all at once
@@ -71,6 +92,40 @@ export async function execute(bot: Bot, action: Action): Promise<void> {
         collected++;
       }
       if (collected === 0) throw new Error(`no ${action.name} within range`);
+      return;
+    }
+    case "craft": {
+      const item = bot.registry.itemsByName[action.name];
+      if (!item) throw new Error(`unknown item: ${action.name}`);
+
+      // 2x2 recipes craft in inventory (no table); 3x3 need a crafting table nearby.
+      const tableId = bot.registry.blocksByName.crafting_table?.id;
+      let table = tableId ? bot.findBlock({ matching: tableId, maxDistance: 32 }) : null;
+      let recipe = bot.recipesFor(item.id, null, 1, table ?? null)[0];
+
+      // place crafting table from inventory if needed
+      if (!recipe && !table && bot.recipesFor(item.id, null, 1, true).length) {
+        table = await placeCraftingTable(bot);
+        recipe = bot.recipesFor(item.id, null, 1, table)[0];
+      }
+      if (!recipe) {
+        // list every recipe's ingredients
+        const all = bot.recipesAll(item.id, null, table ?? true);
+        if (!all.length) throw new Error(`no recipe for ${action.name}`);
+        const opts = [...new Set(all.map((r) =>
+          r.delta.filter((d) => d.count < 0)
+            .map((d) => `${-d.count} ${bot.registry.items[d.id]?.name ?? d.id}`)
+            .join(" + "),
+        ))];
+        const table_ = all[0]!.requiresTable ? "; needs a crafting table nearby" : "";
+        throw new Error(`can't craft ${action.name} yet — need one of: ${opts.join(" | ")}${table_}`);
+      }
+
+      if (recipe.requiresTable && table) {
+        await bot.pathfinder.goto(new goals.GoalGetToBlock(table.position.x, table.position.y, table.position.z));
+        table = bot.blockAt(table.position); // re-fetch after moving
+      }
+      await bot.craft(recipe, action.count, recipe.requiresTable ? table ?? undefined : undefined);
       return;
     }
     default:

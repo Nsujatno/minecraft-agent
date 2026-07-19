@@ -40,5 +40,6 @@ export type Event = ChatEvent | DeathEvent | ActionResult;
 export type ChatAction = { action: "chat"; message: string };
 export type GotoAction = { action: "goto"; x: number; y: number; z: number };
 export type CollectBlockAction = { action: "collect_block"; name: string; count?: number };
+export type CraftAction = { action: "craft"; name: string; count?: number };
 
-export type Action = ChatAction | GotoAction | CollectBlockAction;
+export type Action = ChatAction | GotoAction | CollectBlockAction | CraftAction;

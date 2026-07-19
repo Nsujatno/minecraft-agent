@@ -74,6 +74,10 @@ class Chatbot:
 
         self._history.append({"role": "assistant", "content": decision.model_dump_json()})
 
-        log.info("llm call %d/%d -> %s", self.calls, self._max_calls, decision.model_dump_json())
+        u = response.usage
+        log.info("llm call %d/%d [tokens in=%s out=%s total=%s] -> %s",
+                 self.calls, self._max_calls,
+                 u and u.input_tokens, u and u.output_tokens, u and u.total_tokens,
+                 decision.model_dump_json())
 
         return decision.action
