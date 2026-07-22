@@ -19,6 +19,7 @@ class ChatEvent(BaseModel):
     z: float
     health: float
     food: float
+    held: str | None
     inventory: dict[str, int]
 
 
@@ -39,6 +40,7 @@ class ActionResult(BaseModel):
     z: float
     health: float
     food: float
+    held: str | None
     inventory: dict[str, int]
 
 
@@ -73,15 +75,23 @@ class CollectBlockAction(BaseModel):
 
 
 class CraftAction(BaseModel):
-    """Craft `count` of item `name`. Uses a nearby crafting table automatically if
-    the recipe needs a 3x3 grid; 2x2 recipes are made in inventory. You must already
-    have the ingredients — check inventory first."""
+    """Craft `count` of item `name`. Handles the crafting table for you: 2x2 recipes are
+    made in inventory, and for 3x3 recipes it uses a nearby table or places one from your
+    inventory automatically — never equip or place a table yourself. You must already have
+    the ingredients — check inventory first."""
     action: Literal["craft"] = "craft"
     name: str = Field(description="exact item name, e.g. 'stick', 'crafting_table', 'wooden_pickaxe'")
     count: int = 1
 
 
-Action = Union[ChatAction, GotoAction, CollectBlockAction, CraftAction]
+class EquipAction(BaseModel):
+    """Hold an item from your inventory in your main hand. Mining already equips the
+    best tool by itself — use this only when you want to hold something specific."""
+    action: Literal["equip"] = "equip"
+    name: str = Field(description="exact item name as it appears in your inventory, e.g. 'wooden_pickaxe'")
+
+
+Action = Union[ChatAction, GotoAction, CollectBlockAction, CraftAction, EquipAction]
 
 
 # LLM structured output

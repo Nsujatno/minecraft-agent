@@ -6,6 +6,7 @@ import { BrainLink } from "./brainLink.js";
 import * as config from "./config.js";
 import { wire, snapshot } from "./events.js";
 import { Movements, pathfinder } from "mineflayer-pathfinder";
+import { plugin as tool } from "mineflayer-tool";
 
 const bot = mineflayer.createBot({
   host: config.MC_HOST,
@@ -16,6 +17,7 @@ const bot = mineflayer.createBot({
 });
 
 bot.loadPlugin(pathfinder)
+bot.loadPlugin(tool)
 bot.once("spawn", () => bot.pathfinder.setMovements(new Movements(bot)));
 
 const link = new BrainLink(config.WS_PORT, async (action) => {

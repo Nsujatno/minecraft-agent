@@ -15,6 +15,7 @@ export type ChatEvent = {
   z: number;
   health: number;
   food: number;
+  held: string | null;
   inventory: { [name: string]: number };
 };
 export type DeathEvent = { type: "death" };
@@ -30,6 +31,7 @@ export type ActionResult = {
   z: number;
   health: number;
   food: number;
+  held: string | null;
   inventory: { [item: string]: number };
 };
 
@@ -41,5 +43,6 @@ export type ChatAction = { action: "chat"; message: string };
 export type GotoAction = { action: "goto"; x: number; y: number; z: number };
 export type CollectBlockAction = { action: "collect_block"; name: string; count?: number };
 export type CraftAction = { action: "craft"; name: string; count?: number };
+export type EquipAction = { action: "equip"; name: string };
 
-export type Action = ChatAction | GotoAction | CollectBlockAction | CraftAction;
+export type Action = ChatAction | GotoAction | CollectBlockAction | CraftAction | EquipAction;

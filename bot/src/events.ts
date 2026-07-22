@@ -35,6 +35,7 @@ export function snapshot(bot: Bot) {
     x, y, z,
     health: bot.health,
     food: bot.food,
+    held: bot.heldItem?.name ?? null,
     inventory: bot.inventory.items().reduce(
       (acc, i) => { acc[i.name] = i.count; return acc; },
       {} as { [name: string]: number },

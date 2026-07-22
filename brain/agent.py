@@ -17,12 +17,17 @@ log = logging.getLogger(__name__)
 def _describe_state(s: ActionResult | ChatEvent) -> str:
     inv = ", ".join(f"{n} x{c}" for n, c in s.inventory.items()) or "empty"
     return (f"position {s.x:.0f} {s.y:.0f} {s.z:.0f}, "
-            f"health {s.health:.0f}, food {s.food:.0f}, inventory: {inv}")
+            f"health {s.health:.0f}, food {s.food:.0f}, "
+            f"holding {s.held or 'nothing'}, inventory: {inv}")
 
 
 def _describe(r: ActionResult) -> str:
-    status = "ok" if r.ok else f"failed: {r.error}"
-    return f"[observation] action {r.action} {status}. {_describe_state(r)}"
+    if r.ok:
+        return f"[observation] action {r.action} ok. {_describe_state(r)}"
+    # a failure is the one moment worth a note — say what you got wrong, not what you'll do next
+    return (f"[observation] action {r.action} failed: {r.error}. {_describe_state(r)}\n"
+            "This failure taught you something. Set `note` to the general rule it revealed "
+            "(a recipe, a prerequisite, a wrong assumption) so you never retry this mistake.")
 
 
 class Agent:

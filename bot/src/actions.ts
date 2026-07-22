@@ -88,6 +88,7 @@ export async function execute(bot: Bot, action: Action): Promise<void> {
         await bot.pathfinder.goto(
           new goals.GoalGetToBlock(block.position.x, block.position.y, block.position.z),
         );
+        await bot.tool.equipForBlock(block); // dig uses whatever is held; no-op if already best
         await bot.dig(block);
         collected++;
       }
@@ -126,6 +127,12 @@ export async function execute(bot: Bot, action: Action): Promise<void> {
         table = bot.blockAt(table.position); // re-fetch after moving
       }
       await bot.craft(recipe, action.count, recipe.requiresTable ? table ?? undefined : undefined);
+      return;
+    }
+    case "equip": {
+      const item = bot.inventory.items().find((i) => i.name === action.name);
+      if (!item) throw new Error(`no ${action.name} in inventory`);
+      await bot.equip(item, "hand");
       return;
     }
     default:
