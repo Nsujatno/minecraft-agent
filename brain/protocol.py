@@ -88,3 +88,4 @@ Action = Union[ChatAction, GotoAction, CollectBlockAction, CraftAction]
 class Decision(BaseModel):
     action: Action | None  # None = goal complete, stop the loop
     reason: str
+    note: str | None  # facts worth remembering next session; None = nothing new
