@@ -24,7 +24,7 @@ def _describe_state(s: ActionResult | ChatEvent) -> str:
 def _describe(r: ActionResult) -> str:
     if r.ok:
         return f"[observation] action {r.action} ok. {_describe_state(r)}"
-    # a failure is the one moment worth a note — say what you got wrong, not what you'll do next
+    # create a note when an action fails
     return (f"[observation] action {r.action} failed: {r.error}. {_describe_state(r)}\n"
             "This failure taught you something. Set `note` to the general rule it revealed "
             "(a recipe, a prerequisite, a wrong assumption) so you never retry this mistake.")
